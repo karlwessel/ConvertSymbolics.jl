@@ -6,15 +6,20 @@ function convertterm(T, a)
     if iscall(a)
         convertop(T, operation(a), map(x -> convertterm(T, x), arguments(a)))
     else
-        convertsymbol(T, a)
+        _convertsymbol(T, a)
     end
 end
+
+# this intermediate function is just so that constants from Base
+# can be evaluated, this is necessary when converting from Expr
+_convertsymbol(T, a) = convertsymbol(T, a)
+_convertsymbol(T, a::Symbol) = isdefined(Base, a) ? convertsymbol(T, eval(a)) : convertsymbol(T, a)
 
 convertsymbol(T, a) = convertsymbol(T, repr(a))
 
 convertsymbol(T, a::String) = throw("Define how symbolic variables of type $T are created from a string by implementing `convertop(a::$T, symbol::String)`")
 
-BaseNumbertypes = Union{Int64, Float64, Rational{Int64}, Irrational}
+BaseNumbertypes = Union{Int64, Float64, Rational{Int64}, Irrational, Complex{Int64}, Complex{Float64}, Complex{Bool}}
 convertsymbol(T, a::BaseNumbertypes) = throw("Decide how concrete numbers are represented as $T by implementing `convertop(a::$T, n::BaseNumbertypes)`. Most time numbers can be passed as is, so `convertop(a::$T, n::BaseNumbertypes) = n` will suffice.")
 
 convertop(T, op, args) = op(args...)
@@ -28,15 +33,11 @@ convertsymbol(::Type{Expr}, a::Symbol) = a
 
 convertop(::Type{Expr}, op, args) = maketerm(Expr, :call, [convertsymbol(Expr, op), args...], metadata(first(args)))
 function convertop(T, op::Symbol, args)
-    try
+    if isdefined(Base, op)
         return convertop(T, eval(op), args)
-    catch e
-        if e isa UndefVarError
-            fn = convertcallable(T, op, args)
-            return convertop(T, fn, args)
-        else
-            rethrow(e)
-        end
+    else
+        fn = convertcallable(T, op, args)
+        return convertop(T, fn, args)
     end
 end
 end

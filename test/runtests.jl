@@ -38,6 +38,9 @@ end
             @test isequal(2.1, convertterm(T1, 2.1))
             @test isequal(2//3, convertterm(T1, 2//3))
             @test isequal(pi, convertterm(T1, pi))
+            @test isequal(im, convertterm(T1, im))
+            @test isequal(2+im, convertterm(T1, 2+im))
+            @test isequal(2.1im, convertterm(T1, 2.1im))
 
             x1 = convertterm(T1, "x")
             @test x1 isa S1
@@ -46,6 +49,8 @@ end
             f1 = convertterm(T1, :(f(x,y)))
             @test f1 isa S1
             @test !isequal(x1, y1)
+
+
             @testset "S2: Expr" begin
                 x2 = convertterm(Expr, x1)
 
@@ -66,6 +71,8 @@ end
 
                 @test isequal(x1 + y1, convertterm(T1, :(x + y)))
                 @test isequal(:(y + x), convertterm(Expr, x1 + y1))
+
+                @test isequal(x1 + im*y1, convertterm(T1, :(x + im*y)))
             end
             for (D2, S2, T2) in symboliclibs
                 @testset "S2: $D2" begin
@@ -77,6 +84,24 @@ end
                     @test f2 isa S2
                     @test isequal(f1, convertterm(T1, f2))
 
+                    ops = [+, -, *, /, ^, atan]
+                    terms = [1, 1.2, 1//2, y1, f1, im, pi, 2im, 2.1im]
+                    for op in ops
+                        for t1 in terms
+                            t2 = convertterm(T2, t1)
+                            @test isequal(op(x2, t2), convertterm(T2, op(x1, t1)))
+                        end
+                    end
+
+                    ops = [-, sqrt, sin]
+                    terms = [y1, f1]
+                    for op in ops
+                        for t1 in terms
+                            t2 = convertterm(T2, t1)
+                            @test isequal(op(t2), convertterm(T2, op(t1)))
+                        end
+                    end
+
                     @test isequal(x2 + 1, convertterm(T2, x1 + 1))
                     @test isequal(f2 + 1, convertterm(T2, f1 + 1))
 
@@ -85,6 +110,10 @@ end
                     @test isequal(y2, convertterm(T2, y1))
 
                     @test isequal(x2 + y2, convertterm(T2, x1 + y1))
+
+                    @test isequal(x2 + f2, convertterm(T2, x1 + f1))
+
+                    @test isequal(x2 + im*y2, convertterm(T2, x1 + im*y1))
                 end
             end
         end
