@@ -7,22 +7,26 @@ version = "1.0.0-DEV"
 TermInterface = "8ea1fca8-c5ef-4a55-8b96-4e9afe9c9a3c"
 
 [weakdeps]
+DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [extensions]
+DynamicPolynomialsExt = ["DynamicPolynomials", "SymbolicUtils"]
 SymbolicUtilsExt = "SymbolicUtils"
 SymbolicsExt = ["Symbolics", "SymbolicUtils"]
 
 [compat]
+DynamicPolynomials = "0.6.1"
 SymbolicUtils = "3.19.0"
 TermInterface = "2.0.0"
 julia = "1.10"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SymbolicUtils", "Symbolics"]
+test = ["Test", "SymbolicUtils", "Symbolics", "DynamicPolynomials"]
