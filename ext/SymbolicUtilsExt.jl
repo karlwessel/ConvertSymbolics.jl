@@ -2,13 +2,11 @@ module SymbolicUtilsExt # Should be same name as the file (just like a normal pa
 
 using SymbolicUtils: Symbolic, Sym, FnType
 using ConvertSymbolics
-import ConvertSymbolics: convertsymbol, convertcallable, convertop
+import ConvertSymbolics: common2leaf, call2common, common2call
 
-convertsymbol(::Type{Symbolic{T}}, a::BaseNumbertypes) where T = a
-convertsymbol(S::Type{Symbolic{T}}, a::String) where T = convertsymbol(S, Symbol(a))
-convertsymbol(::Type{Symbolic{T}}, a::Symbol) where T = Sym{T}(a)
+common2leaf(::Type{Symbolic{T}}, a::BaseNumbertypes) where T = a
+common2leaf(::Type{Symbolic{T}}, a::Symbol) where T = Sym{T}(a)
 
-convertop(::Type{Symbolic{T}}, fn::Symbol, args) where T = Sym{FnType{NTuple{length(args), T}, T, Nothing}}(fn)(args...)
-
-convertcallable(S, op::Symbolic{FnType{NTuple{N, T}, T, Nothing}}) where {N, T} = nameof(op)
+call2common(op::Symbolic{FnType{NTuple{N, T}, T, Nothing}}) where {N, T} = nameof(op)
+common2call(::Type{Symbolic{T}}, fn::Symbol, args) where T = Sym{FnType{NTuple{length(args), T}, T, Nothing}}(fn)(args...)
 end # module

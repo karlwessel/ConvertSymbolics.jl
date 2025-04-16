@@ -6,9 +6,9 @@ using Symbolics: Num
 const SU = Symbolic{Number}
 @testset "ConvertSymbolics.jl" begin
     T2 = Expr
-    x2 = convertterm(T2, "x")
+    x2 = convertterm(T2, :x)
     T1 = Num
-    x1 = convertterm(T1, "x")
+    x1 = convertterm(T1, :x)
 
     f1 = convertterm(T1, :(f(y)))
 
@@ -24,13 +24,13 @@ end
     @test isequal(2//3, convertterm(Expr, 2//3))
     @test isequal(pi, convertterm(Expr, pi))
 
-    x1 = convertterm(Expr, "x")
+    x1 = convertterm(Expr, :x)
     @test x1 isa Symbol
 
     x2 = convertterm(Expr, x1)
     @test isequal(x1, convertterm(Expr, x2))
 
-    y1 = convertterm(Expr, "y")
+    y1 = convertterm(Expr, :y)
     @test !isequal(x1, y1)
 
     symboliclibs = [("SymbolicUtils", SU, SU), ("Symbolics", Num, Num)]
@@ -41,10 +41,10 @@ end
             @test isequal(2//3, convertterm(T1, 2//3))
             @test isequal(pi, convertterm(T1, pi))
 
-            x1 = convertterm(T1, "x")
+            x1 = convertterm(T1, :x)
             @test x1 isa S1
 
-            y1 = convertterm(T1, "y")
+            y1 = convertterm(T1, :y)
             f1 = convertterm(T1, :(f(x,y)))
             @test f1 isa S1
             @test !isequal(x1, y1)
@@ -102,7 +102,7 @@ end
                     @test isequal(x2 + 1, convertterm(T2, x1 + 1))
                     @test isequal(f2 + 1, convertterm(T2, f1 + 1))
 
-                    y2 = convertterm(T2, "y")
+                    y2 = convertterm(T2, :y)
                     @test !isequal(x2, y2)
                     @test isequal(y2, convertterm(T2, y1))
 
