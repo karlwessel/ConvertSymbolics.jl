@@ -42,7 +42,7 @@ end
         ("basering 1 of absolute power series", 
             wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 1), 
             [ringtower]),
-        ("basering 1 of absolute power series", 
+        ("basering 2 of absolute power series", 
             wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 2), 
             [ringtower]),
         ("multivariate power series", wrap2dto1d((R, vs) -> power_series_ring(R, 4, vs)), [QQ]),
@@ -54,31 +54,33 @@ end
                     @testset "Basering: $basering" begin
                         R, x = constructor(basering, :x)
 
+                        c = 2*one(R)
+
                         @test !iscall(x)
 
-                        @test iscall(2x)
-                        @test operation(2x) == *
-                        @test arguments(2x) == [2, x]
+                        @test iscall(c*x)
+                        @test operation(c*x) == *
+                        @test arguments(c*x) == [c, x]
                     
                         @test iscall(x^2)
                         @test operation(x^2) == ^
                         @test arguments(x^2) == [x, 2]
                     
-                        @test operation(2x^2) == *
-                        @test arguments(2x^2) == [2, x^2]
+                        @test operation(c*x^2) == *
+                        @test arguments(c*x^2) == [c, x^2]
                     
-                        @test iscall(x + 1)
-                        @test operation(x + 1) == +
-                        @test (arguments(x+1) == [1, x]) || (arguments(x+1) == [x, 1])
+                        @test iscall(x + c)
+                        @test operation(x + c) == +
+                        @test (arguments(x+c) == [c, x]) || (arguments(x+c) == [x, c])
                     
-                        @test !iscall(x+1-x)
+                        @test !iscall(x+c-x)
                     
                         @test !iscall(x)
-                        @test !iscall(x + 1 - 1)
+                        @test !iscall(x + c - c)
                         @test !iscall(0*x)
-                        @test !iscall(2x/2)
-                        @test !iscall(0*(x + 1))
-                        @test !iscall(0*(2x))
+                        @test !iscall(c*x/c)
+                        @test !iscall(0*(x + c))
+                        @test !iscall(0*(c*x))
                         @test !iscall(0*(x^2))
                         @test !iscall(x-x)
                     
@@ -86,18 +88,15 @@ end
                         @test operation(x^2) == ^
                         @test arguments(x^2) == [x, 2]
                     
-                        @test iscall(2x)
-                        @test operation(2x) == *
+                        @test arguments(c*x^2) == [c, x^2]
                     
-                        @test arguments(2x^2) == [2, x^2]
+                        @test iscall(x^2 + c -c)
+                        @test operation(x^2 + c -c) == ^
+                        @test arguments(x^2 + c -c) == [x, 2]
                     
-                        @test iscall(x^2 + 1 -1)
-                        @test operation(x^2 + 1 -1) == ^
-                        @test arguments(x^2 + 1 -1) == [x, 2]
-                    
-                        @test iscall(2x^2 + 1 -1)
-                        @test operation(2x^2 + 1 -1) == *
-                        @test arguments(2x^2 + 1 -1) == [2, x^2]
+                        @test iscall(c*x^2 + c -c)
+                        @test operation(c*x^2 + c -c) == *
+                        @test arguments(c*x^2 + c -c) == [c, x^2]
                     end
                 end
             end
@@ -143,6 +142,47 @@ end
                         @test iscall(y*x)
                         @test operation(y*x) == *
                         @test arguments(y*x) == [x, y]
+                    end
+                end
+            end
+        end
+    end
+
+    towerrings = [
+        ("multivariate laurent ring", wrap2dto1d(laurent_polynomial_ring), [R1]),
+        ("basering of multivariate laurent ring", wrapbasering(wrap2dto1d(laurent_polynomial_ring), 1), [R1]),
+        #=("absolute power series", 
+            (R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 
+            [ringtower]), BROKEN =# 
+        ("basering 1 of absolute power series", 
+            wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 1), 
+            [ringtower]),
+        ("basering 2 of absolute power series", 
+            wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 2), 
+            [ringtower]),
+    ]
+    @testset "tower tests" begin
+        for (name, constructor, baserings) in towerrings
+            @testset "$name" begin
+                for basering in baserings
+                    @testset "Basering: $basering" begin
+                        R, x = constructor(basering, :x)
+
+                        c = 2*one(basering)
+
+                        @test !iscall(x)
+
+                        @test iscall(c*x)
+                        @test operation(c*x) == *
+                        @test arguments(c*x) == [c, x]
+
+                        @test iscall(c + x)
+                        @test operation(c + x) == +
+                        @test arguments(c + x) == [x, c]
+
+                        @test iscall(c*x^2 + c -c)
+                        @test operation(c*x^2 + c -c) == *
+                        @test arguments(c*x^2 + c -c) == [c, x^2]
                     end
                 end
             end
