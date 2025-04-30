@@ -11,6 +11,16 @@ function wrap2dto1d(constructor)
     end
 end
 
+function wrapbasering(constructor, depth)
+    (B, v) -> begin
+        R, _ = constructor(B, :dummy)
+        for _ in 1:depth
+            R = base_ring(R)
+        end
+        return R, first(gens(R))
+    end
+end
+
 @testset "generic tests" begin
     R1 = universal_polynomial_ring(CalciumField())
     gen.(Ref(R1), [:a, :b])
@@ -25,9 +35,16 @@ end
             return P, gen(P, v)
         end, [QQ, CalciumField()]),
         ("multivariate laurent ring", wrap2dto1d(laurent_polynomial_ring), [QQ, R1]),
+        ("basering of multivariate laurent ring", wrapbasering(wrap2dto1d(laurent_polynomial_ring), 1), [R1]),
         ("absolute power series", 
             (R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 
             [QQ, ringtower]),
+        ("basering 1 of absolute power series", 
+            wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 1), 
+            [ringtower]),
+        ("basering 1 of absolute power series", 
+            wrapbasering((R, v) -> power_series_ring(R, 4, v, model=:capped_absolute), 2), 
+            [ringtower]),
         ("multivariate power series", wrap2dto1d((R, vs) -> power_series_ring(R, 4, vs)), [QQ]),
     ]
     @testset "1D tests" begin
