@@ -1,6 +1,14 @@
 module AbstractAlgebraExt
 using AbstractAlgebra
 using TermInterface
+using ConvertSymbolics
+
+# conversion
+ConvertSymbolics.leaf2common(a::Rational{BigInt}) = Rational{Int64}(a)
+ConvertSymbolics.common2leaf(R::UniversalPolyRing, s::Symbol) = gen(R, s)
+ConvertSymbolics.common2leaf(R::UniversalPolyRing, s::BaseNumbertypes) = s
+
+# terminterface
 
 function nonzerocoeffswithexp(x)
 	[(i-1, c) for (i, c) in enumerate(coefficients(x)) if !iszero(c)]
@@ -56,6 +64,7 @@ const Polylike = Union{UniversalPolyRingElem, LaurentMPolyRingElem, AbstractAlge
 MPolyRingElem}
 
 iscoeffonly(p::Polylike) = length(p) == 0 || length(p) == 1 && isone(only(monomials(p)))
+iscoeffonly(p::Rational) = true
 iscoeffonly(p) = false
 
 nonzerocoeffs(x) = coefficients(x)
@@ -63,7 +72,21 @@ nonzerocoeffs(x) = coefficients(x)
 numnonzerocoeffs(x) = length(nonzerocoeffs(x))
 
 tonumber(x::Polylike) = coefficient(x)
-tonumber(x) = Rational(QQ(real(x))) + im*Rational(QQ(imag(x)))
+function tonumber(x)
+    if isreal(x)
+        try
+            Int64(QQ(real(x)))
+        catch e
+            if e isa InexactError
+                Rational{Int64}(QQ(real(x)))
+            else
+                rethrow(e)
+            end
+        end
+    else
+        Rational(QQ(real(x))) + im*Rational(QQ(imag(x)))
+    end
+end
 
 function coefficient(p::RingElem)
 	numnonzerocoeffs(p) == 0 && return 0
