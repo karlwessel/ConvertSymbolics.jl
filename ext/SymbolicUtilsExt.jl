@@ -7,6 +7,6 @@ import ConvertSymbolics: common2leaf, call2common, common2call
 common2leaf(::Type{Symbolic{T}}, a::BaseNumbertypes) where T = a
 common2leaf(::Type{Symbolic{T}}, a::Symbol) where T = Sym{T}(a)
 
-call2common(op::Symbolic{FnType{NTuple{N, T}, T, Nothing}}) where {N, T} = nameof(op)
-common2call(::Type{Symbolic{T}}, fn::Symbol, args) where T = Sym{FnType{NTuple{length(args), T}, T, Nothing}}(fn)(args...)
+call2common(op::Symbolic{FnType{NTuple{N, S}, T}}) where {N, S, T} = nameof(op)
+common2call(::Type{Symbolic{T}}, fn::Symbol, args) where T = Sym{FnType{NTuple{length(args), T}, T}}(fn)(args...)
 end # module
