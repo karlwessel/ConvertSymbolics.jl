@@ -56,5 +56,5 @@ common2call(::Type{Expr}, op::Function, args) = common2call(Expr, Symbol(op), ar
 common2call(::Type{Expr}, op::Symbol, args) = maketerm(Expr, :call, [op, args...], metadata(first(args)))
 common2call(::Type{Expr}, op::Differential, args) = maketerm(Expr, :call, [op, args...], metadata(first(args)))
 
-include("SymbolicChimeras.jl")
+#include("SymbolicChimeras.jl")
 end
