@@ -57,7 +57,7 @@ end
 function TermInterface.arguments(x::UnivariatePolylike)
 	cs = nonzerocoeffswithexp(x)
 	v = gen(parent(x))
-	if length(cs) > 1		
+	if length(cs) > 1
 		return [c*v^e for (e, c) in cs]
 	end
 
@@ -81,6 +81,7 @@ MPolyRingElem}
 
 iscoeffonly(p::Polylike) = length(p) == 0 || length(p) == 1 && isone(only(monomials(p)))
 iscoeffonly(p::Rational) = true
+iscoeffonly(p::FieldElem) = true
 iscoeffonly(p) = false
 
 nonzerocoeffs(x) = coefficients(x)
@@ -88,19 +89,16 @@ nonzerocoeffs(x) = coefficients(x)
 numnonzerocoeffs(x) = length(nonzerocoeffs(x))
 
 tonumber(x::Polylike) = coefficient(x)
+
 function tonumber(x)
-    if isreal(x)
-        try
-            Int64(QQ(real(x)))
-        catch e
-            if e isa InexactError
-                Rational{Int64}(QQ(real(x)))
-            else
-                rethrow(e)
-            end
+    try
+        Int64(QQ(real(x)))
+    catch e
+        if e isa InexactError
+            Rational{Int64}(QQ(real(x)))
+        else
+            rethrow(e)
         end
-    else
-        Rational(QQ(real(x))) + im*Rational(QQ(imag(x)))
     end
 end
 
