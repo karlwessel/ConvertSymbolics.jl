@@ -11,6 +11,7 @@ common2leaf(::Type{Num}, a::Symbol) = wrap(common2leaf(Symbolic{Real}, a))
 common2call(::Type{Num}, fn::Symbol, args) = wrap(Sym{FnType{NTuple{length(args), Any}, Real}}(fn))(args...)
 
 convertterm(T, a::Num) = convertterm(T, unwrap(a))
+convertterm(::Type{Num}, a::Num) = a
 convertterm(T, a::Equation) = throw(ErrorException("Don't know how to convert an Equation!"))
 
 call2common(op::Symbolics.Differential) = ConvertSymbolics.Differential([convertterm(Expr, op.x)])

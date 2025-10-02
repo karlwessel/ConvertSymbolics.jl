@@ -37,24 +37,23 @@ leaf2common(a::BaseNumbertypes) = a
 call2common(f::Function) = f
 call2common(f) = throw("Define how symbolic callables of type $(typeof(f)) are transformed to a $CommonCallable by implementing`call2common(op::$(typeof(f)))::CommonCallable`")
 
-common2leaf(T, ::Symbol) = throw("Define how symbolic variables of type $(typeof(T)) are created from a symbol by implementing `common2leaf(a::$(typeof(T)), symbol::Symbol)`")
-common2leaf(T, ::BaseNumbertypes) = throw("Decide how concrete numbers are represented as $(typeof(T)) by implementing `common2leaf(a::$(typeof(T)), n::BaseNumbertypes)`. Most time numbers can be passed as is, so `convertop(a::$(typeof(T)), n::BaseNumbertypes) = n` will suffice.")
+common2leaf(T, x) = common2leaf(typeof(T), x)
 
 common2leaf(T::Type, ::Symbol) = throw("Define how symbolic variables of type $T are created from a symbol by implementing `common2leaf(a::Type{$T}, symbol::Symbol)`")
 common2leaf(T::Type, ::BaseNumbertypes) = throw("Decide how concrete numbers are represented as $T by implementing `common2leaf(a::Type{$T}, n::BaseNumbertypes)`. Most time numbers can be passed as is, so `convertop(a::Type{$T}, n::BaseNumbertypes) = n` will suffice.")
 
-common2call(T, op::Function, args) = op(args...)
-common2call(T, ::Symbol, args) = throw("Define how symbolic callables of type $T are created from a symbol by implementing `common2call(a::Type{$T}, symbol::Symbol, args)`")
+common2call(T, op, args) = common2call(typeof(T), op, args)
+common2call(T::Type, op::Function, args) = op(args...)
+common2call(T::Type, ::CommonCallable, args) = throw("Define how symbolic callables of type $T are created from a symbol by implementing `common2call(a::Type{$T}, symbol::Symbol, args)`")
 
 # implementation for TermInterfaces Expr representation
 common2leaf(::Type{Expr}, a::BaseNumbertypes) = a
 common2leaf(::Type{Expr}, a::Symbol) = a
 
+call2common(D::Differential) = D
 call2common(op::Symbol) = isdefined(Base, op) ? eval(op) : op
 leaf2common(a::Symbol) = isdefined(Base, a) ? eval(a) : a
 common2call(::Type{Expr}, op::Function, args) = common2call(Expr, Symbol(op), args)
 common2call(::Type{Expr}, op::Symbol, args) = maketerm(Expr, :call, [op, args...], metadata(first(args)))
 common2call(::Type{Expr}, op::Differential, args) = maketerm(Expr, :call, [op, args...], metadata(first(args)))
-
-#include("SymbolicChimeras.jl")
 end
