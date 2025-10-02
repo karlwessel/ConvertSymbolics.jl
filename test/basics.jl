@@ -1,8 +1,9 @@
 using ConvertSymbolics
-using SymbolicUtils: Symbolic
+using SymbolicUtils: Symbolic, expand
 using Test
 using Symbolics: Num
 using AbstractAlgebra
+using Sympoly
 
 const SU = Symbolic{Number}
 @testset "ConvertSymbolics.jl" begin
@@ -35,8 +36,11 @@ end
     @test !isequal(x1, y1)
 
     R = universal_polynomial_ring(QQ)
-    symboliclibs = [("SymbolicUtils", SU, SU), ("Symbolics", Num, Num), ("univ poly", UniversalPolyRingElem, R)]
-    for (D1, S1, T1) in symboliclibs
+    symboliclibs = [("SymbolicUtils", SU, SU, (a, b) -> isequal(0, expand(a-b))),
+                    ("Symbolics", Num, Num, (a, b) -> isequal(0, expand(a-b))),
+                    ("Sympoly", Polyform, Polyform, isequal),
+                    ("univ poly", UniversalPolyRingElem, R, isequal)]
+    for (D1, S1, T1, isequal1) in symboliclibs
         @testset "S1: $D1" begin
             @test isequal(2, convertterm(T1, 2))
             @test isequal(2.1, convertterm(T1, 2.1))
@@ -66,7 +70,7 @@ end
                 @test isequal(:(y + x), convertterm(Expr, x1 + y1)) ||
                     isequal(:(x + y), convertterm(Expr, x1 + y1))
             end
-            for (D2, S2, T2) in symboliclibs
+            for (D2, S2, T2, isequal2) in symboliclibs
                 @testset "S1: $D1 S2: $D2" begin
                     x2 = convertterm(T2, x1)
                     @test x2 isa S2
@@ -74,10 +78,10 @@ end
 
                     ops = [+, -, *, /, ^]
                     terms = Any[2]
-                    for op in ops
-                        for t1 in terms
+                    @testset for op in ops
+                        @testset for t1 in terms
                             t2 = convertterm(T2, t1)
-                            @test isequal(op(x2, t2), convertterm(T2, op(x1, t1)))
+                            @test isequal2(op(x2, t2), convertterm(T2, op(x1, t1)))
                         end
                     end
 
@@ -86,7 +90,7 @@ end
                     for op in ops
                         for t1 in terms
                             t2 = convertterm(T2, t1)
-                            @test isequal(op(x2, t2), convertterm(T2, op(x1, t1)))
+                            @test isequal2(op(x2, t2), convertterm(T2, op(x1, t1)))
                         end
                     end
 

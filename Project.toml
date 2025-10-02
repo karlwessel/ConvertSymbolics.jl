@@ -11,12 +11,14 @@ AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
 DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Sympoly = "0e2d26dc-53d7-47aa-8946-d9915dfd864d"
 
 [extensions]
 AbstractAlgebraExt = ["AbstractAlgebra"]
 DynamicPolynomialsExt = ["DynamicPolynomials", "SymbolicUtils"]
 SymbolicUtilsExt = "SymbolicUtils"
 SymbolicsExt = ["Symbolics", "SymbolicUtils"]
+SympolyExt = ["Sympoly"]
 
 [compat]
 AbstractAlgebra = "0.44.11"
