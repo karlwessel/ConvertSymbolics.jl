@@ -27,7 +27,7 @@ end
 # terminterface
 
 function nonzerocoeffswithexp(x)
-	[(i-1, c) for (i, c) in enumerate(coefficients(x)) if !iszero(c)]
+    [(i-1, c) for (i, c) in enumerate(coefficients(x)) if !iszero(c)]
 end
 
 function isconst(p::RingElem)
@@ -46,24 +46,24 @@ const UnivariatePolylike = Union{PolyRingElem, LaurentPolyRingElem, SeriesElem}
 TermInterface.iscall(x::UnivariatePolylike) = !(is_gen(x) || isconst(x))
 
 function TermInterface.operation(x::UnivariatePolylike)
-	c = nonzerocoeffswithexp(x)
-	length(c) > 1 && return (+)
+    c = nonzerocoeffswithexp(x)
+    length(c) > 1 && return (+)
 
-	e, c = only(c)
-	isone(c) && return ^
-	return *
+    e, c = only(c)
+    isone(c) && return ^
+    return *
 end
 
 function TermInterface.arguments(x::UnivariatePolylike)
-	cs = nonzerocoeffswithexp(x)
-	v = gen(parent(x))
-	if length(cs) > 1
-		return [c*v^e for (e, c) in cs]
-	end
+    cs = nonzerocoeffswithexp(x)
+    v = gen(parent(x))
+    if length(cs) > 1
+        return [c*v^e for (e, c) in cs]
+    end
 
-	e, c = only(cs)
-	isone(c) && return [v, e]
-	return [c, v^e]
+    e, c = only(cs)
+    isone(c) && return [v, e]
+    return [c, v^e]
 end
 
 # poly
@@ -71,7 +71,7 @@ isconst(p::PolyRingElem) = degree(p) <= 0
 
 # Laurent poly
 function nonzerocoeffswithexp(x::LaurentPolyRingElem)
-	[(i, coeff(x, i)) for i in Generic.terms_degrees(x) if !iszero(coeff(x, i))]
+    [(i, coeff(x, i)) for i in Generic.terms_degrees(x) if !iszero(coeff(x, i))]
 end
 
 
@@ -103,9 +103,9 @@ function tonumber(x)
 end
 
 function coefficient(p::RingElem)
-	numnonzerocoeffs(p) == 0 && return 0
-	c = only(nonzerocoeffs(p))
-	iscall(c) || !iscoeffonly(c) ? c : tonumber(c)
+    numnonzerocoeffs(p) == 0 && return 0
+    c = only(nonzerocoeffs(p))
+    iscall(c) || !iscoeffonly(c) ? c : tonumber(c)
 end
 
 TermInterface.iscall(x::Polylike) = !(is_gen(x) || iscoeffonly(x) && !iscall(coefficient(x)))
@@ -114,8 +114,8 @@ powers(m) = [(v, e) for (v, e) in zip(gens(parent(m)), only(exponent_vectors(m))
 
 function TermInterface.operation(x::Polylike)
     if numnonzerocoeffs(x) == 1 #e.g. 2xy^2
-		c = coefficient(x)
-		iscoeffonly(x) && return operation(c)
+        c = coefficient(x)
+        iscoeffonly(x) && return operation(c)
 
         if length(powers(x)) == 1 && isone(c) #e.g. y^2 or sin(y)^2
             return (^)
@@ -130,14 +130,14 @@ end
 function TermInterface.arguments(x::Polylike)
     if numnonzerocoeffs(x) == 1
         c = coefficient(x)
-		iscoeffonly(x) && return arguments(c)
-		
+        iscoeffonly(x) && return arguments(c)
+
         m = only(monomials(x))
 
         if !isone(c)
             [c, m]
         else
-			pows = powers(m)
+            pows = powers(m)
             if length(pows) == 1
                 v, e = only(pows)
                 return [v, e]
