@@ -18,7 +18,7 @@ using TermInterface
     @test !iscall(0*(x + 1))
     @test !iscall(0*(2x))
     @test !iscall(0*(x^2))
-    @test !iscall(monomial(2x))
+    @test !iscall(DynamicPolynomials.monomial(2x))
     @test !iscall(x-x)
 
     @test iscall(x + 1)
