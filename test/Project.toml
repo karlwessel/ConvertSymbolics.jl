@@ -1,0 +1,12 @@
+[deps]
+AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
+ConvertSymbolics = "959e4ae2-4b8a-4f0b-bc9b-21a2c241f050"
+DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
+Nemo = "2edaba10-b0f1-5616-af89-8c11ac63239a"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Sympoly = "0e2d26dc-53d7-47aa-8946-d9915dfd864d"
+TermInterface = "8ea1fca8-c5ef-4a55-8b96-4e9afe9c9a3c"
+TermInterfaceImpls = "461cda38-4d77-4be4-9c9e-832dea160268"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
