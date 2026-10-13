@@ -15,7 +15,7 @@ const CommonLeaf = Union{Symbol, BaseNumbertypes}
 
 convertleaf(T, a) = common2leaf(T, leaf2common(a)::CommonLeaf)
 function convertcall(T, op, args)
-    cop = call2common(op)::CommonCallable
+    cop = call2common(op, args)::CommonCallable
     common2call(T, cop, map(x -> convertterm(T, x), args))
 end
 function convertterm(T, a)
@@ -34,6 +34,7 @@ convertterm(::Type{T}, a::T) where T = a
 leaf2common(a) = Symbol(repr(a))
 leaf2common(a::BaseNumbertypes) = a
 
+call2common(op, args) = call2common(op)
 call2common(f::Function) = f
 call2common(f) = throw("Define how symbolic callables of type $(typeof(f)) are transformed to a $CommonCallable by implementing`call2common(op::$(typeof(f)))::CommonCallable`")
 

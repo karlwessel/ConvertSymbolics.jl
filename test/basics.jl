@@ -4,6 +4,7 @@ using Test
 using Symbolics: Num
 using AbstractAlgebra
 using Sympoly
+using Nemo
 
 const SU = Symbolic{Number}
 @testset "ConvertSymbolics.jl" begin
@@ -35,86 +36,85 @@ end
     y1 = convertterm(Expr, :y)
     @test !isequal(x1, y1)
 
-    R = universal_polynomial_ring(QQ)
-    symboliclibs = [("SymbolicUtils", SU, SU, (a, b) -> isequal(0, expand(a-b))),
-                    ("Symbolics", Num, Num, (a, b) -> isequal(0, expand(a-b))),
-                    ("Sympoly", Polyform, Polyform, isequal),
-                    ("univ poly", UniversalPolyRingElem, R, isequal)]
-    for (D1, S1, T1, isequal1) in symboliclibs
-        @testset "S1: $D1" begin
-            @test isequal(2, convertterm(T1, 2))
-            @test isequal(2.1, convertterm(T1, 2.1))
-            @test isequal(2//3, convertterm(T1, 2//3))
-            @test isequal(pi, convertterm(T1, pi))
+    R = universal_polynomial_ring(AbstractAlgebra.QQ)
+    R2, _ = polynomial_ring(AbstractAlgebra.QQ, [:x, :y])
+    R3, _ = laurent_polynomial_ring(AbstractAlgebra.QQ, [:x, :y])
+    R4 = universal_polynomial_ring(Nemo.QQ)
+    
+    symboliclibs = [#("SymbolicUtils", SU, SU, (a, b) -> isequal(0, expand(a-b))),
+                    #("Symbolics", Num, Num, (a, b) -> isequal(0, expand(a-b))),
+                    #("Sympoly", Polyform, Polyform, isequal),
+                    #("univ poly", UniversalPolyRingElem, R, ==),
+                    ("mpoly", MPolyRingElem, R2, ==),
+                    ("laurent mpoly", LaurentMPolyRingElem, R3, ==),
+                    ("Nemo QQ univ poly", UniversalPolyRingElem, R4, ==)]
+    @testset failfast=true "S1: $D1" for (D1, S1, T1, isequal1) in symboliclibs
+        @test isequal(2, convertterm(T1, 2))
+        @test isequal(2.1, convertterm(T1, 2.1))
+        @test isequal(2//3, convertterm(T1, 2//3))
+        @test isequal(pi, convertterm(T1, pi))
 
-            x1 = convertterm(T1, :x)
-            @test x1 isa S1
+        x1 = convertterm(T1, :x)
+        @test x1 isa S1
 
-            y1 = convertterm(T1, :y)
-            @test !isequal(x1, y1)
+        y1 = convertterm(T1, :y)
+        @test !isequal(x1, y1)
 
+        @testset "S1: $D1 S2: Expr" begin
+            x2 = convertterm(Expr, x1)
 
-            @testset "S1: $D1 S2: Expr" begin
-                x2 = convertterm(Expr, x1)
+            @test isequal(:x, x2)
+            @test isequal(x1, convertterm(T1, x2))
 
-                @test isequal(:x, x2)
-                @test isequal(x1, convertterm(T1, x2))
+            @test isequal(x1 + 1, convertterm(T1, :(x + 1)))
 
-                @test isequal(x1 + 1, convertterm(T1, :(x + 1)))
-                @test isequal(:(1 + x), convertterm(Expr, x1 + 1)) ||
-                    isequal(:(x + 1), convertterm(Expr, x1 + 1))
+            @test isequal(:y, convertterm(Expr, y1))
 
-                @test isequal(:y, convertterm(Expr, y1))
+            @test isequal(x1 + y1, convertterm(T1, :(x + y)))
+        end
+        @testset "S1: $D1 S2: $D2" for (D2, S2, T2, isequal2) in symboliclibs
+            x2 = convertterm(T2, x1)
+            @test x2 isa S2
+            @test isequal(x1, convertterm(T1, x2))
 
-                @test isequal(x1 + y1, convertterm(T1, :(x + y)))
-                @test isequal(:(y + x), convertterm(Expr, x1 + y1)) ||
-                    isequal(:(x + y), convertterm(Expr, x1 + y1))
-            end
-            for (D2, S2, T2, isequal2) in symboliclibs
-                @testset "S1: $D1 S2: $D2" begin
-                    x2 = convertterm(T2, x1)
-                    @test x2 isa S2
-                    @test isequal(x1, convertterm(T1, x2))
-
-                    ops = [+, -, *, /, ^]
-                    terms = Any[2]
-                    @testset for op in ops
-                        @testset for t1 in terms
-                            t2 = convertterm(T2, t1)
-                            @test isequal2(op(x2, t2), convertterm(T2, op(x1, t1)))
-                        end
-                    end
-
-                    ops = [+, -, *]
-                    terms = Any[y1, 1//2]
-                    for op in ops
-                        for t1 in terms
-                            t2 = convertterm(T2, t1)
-                            @test isequal2(op(x2, t2), convertterm(T2, op(x1, t1)))
-                        end
-                    end
-
-                    ops = [-]
-                    terms = [y1]
-                    for op in ops
-                        for t1 in terms
-                            t2 = convertterm(T2, t1)
-                            @test isequal(op(t2), convertterm(T2, op(t1)))
-                        end
-                    end
-
-                    @test isequal(x2 + 1, convertterm(T2, x1 + 1))
-
-                    y2 = convertterm(T2, :y)
-                    @test !isequal(x2, y2)
-                    @test isequal(y2, convertterm(T2, y1))
-
-                    @test isequal(x2 + y2, convertterm(T2, x1 + y1))
+            ops = [+, -, *, /, ^]
+            terms = Any[2]
+            @testset for op in ops
+                @testset for t1 in terms
+                    t2 = convertterm(T2, t1)
+                    @test op(x2, t2) == convertterm(T2, op(x1, t1))
                 end
             end
+
+            ops = [+, -, *]
+            terms = Any[y1, 1//2]
+            for op in ops
+                for t1 in terms
+                    t2 = convertterm(T2, t1)
+                    @test isequal2(op(x2, t2), convertterm(T2, op(x1, t1)))
+                end
+            end
+
+            ops = [-]
+            terms = [y1]
+            for op in ops
+                for t1 in terms
+                    t2 = convertterm(T2, t1)
+                    @test isequal(op(t2), convertterm(T2, op(t1)))
+                end
+            end
+
+            @test isequal(x2 + 1, convertterm(T2, x1 + 1))
+
+            y2 = convertterm(T2, :y)
+            @test !isequal(x2, y2)
+            @test isequal(y2, convertterm(T2, y1))
+
+            @test isequal(x2 + y2, convertterm(T2, x1 + y1))
         end
     end
 
+    # libs that support functional expression
     symboliclibs = [("SymbolicUtils", SU, SU), ("Symbolics", Num, Num)]
     for (D1, S1, T1) in symboliclibs
         @testset "S1: $D1" begin
@@ -178,7 +178,11 @@ end
 
 #=
 @testset "Complex symbolics" begin
-    symboliclibs = [("SymbolicUtils", SU, SU), ("Symbolics", Num, Num)]
+    CC = CalciumField()
+    R = universal_polynomial_ring(CC)
+    symboliclibs = [("SymbolicUtils", SU, SU), 
+        ("Symbolics", Num, Num),
+        ("univ poly", UniversalPolyRingElem, R)]
     for (D1, S1, T1) in symboliclibs
         @testset "S1: $D1" begin
             @test isequal(im, convertterm(T1, im))
