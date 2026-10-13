@@ -3,7 +3,7 @@ using SymbolicUtils: Symbolic, expand
 using Test
 using Symbolics: Num
 using AbstractAlgebra
-using Sympoly
+using TermInterfaceImpls
 using Nemo
 
 const SU = Symbolic{Number}
